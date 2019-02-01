@@ -33,6 +33,9 @@ public class MainActivity extends AppCompatActivity {
     private Button warn;
     private TextView rece;
     private String imei;
+    private String ip;
+    private String port;
+    private String sub ,name ,psd;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,6 +44,12 @@ public class MainActivity extends AppCompatActivity {
         rece = (TextView) findViewById(R.id.rece);
         input = (EditText) findViewById(R.id.input);
         warn = findViewById(R.id.warn);
+
+        psd = getIntent().getStringExtra("psd");
+        name = getIntent().getStringExtra("name");
+        sub = getIntent().getStringExtra("sub");
+        ip = getIntent().getStringExtra("ip");
+        port = getIntent().getStringExtra("port");
         warn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -52,7 +61,7 @@ public class MainActivity extends AppCompatActivity {
                         return;
                     }
                     //消息主题
-                    String topic = "test";
+                    String topic = sub;
                     //消息策略
                     int qos = 0;
                     //是否保留
@@ -166,7 +175,7 @@ public class MainActivity extends AppCompatActivity {
      * 订阅主题
      */
     private void subscribe() {
-        String[] topics = new String[]{"test"};
+        String[] topics = new String[]{sub};
         //主题对应的推送策略 分别是0, 1, 2 建议服务端和客户端配置的主题一致
         // 0 表示只会发送一次推送消息 收到不收到都不关心
         // 1 保证能收到消息，但不一定只收到一条
@@ -206,7 +215,7 @@ public class MainActivity extends AppCompatActivity {
             }
             @Override
             public void connectSuccess(IMqttToken arg0) {
-                Toast.makeText(MainActivity.this, "connectSuccess", Toast.LENGTH_SHORT).show();
+                Toast.makeText(MainActivity.this, "连接成功！", Toast.LENGTH_LONG).show();
                 Log.e(TAG + "@@@@@connectSuccess", "success");
                 subscribe();
             }
@@ -214,7 +223,7 @@ public class MainActivity extends AppCompatActivity {
             public void connectFailed(IMqttToken arg0, Throwable arg1) {
                 //连接失败
                 Log.e(TAG + "@@@@@connectFailed", "fail" + arg1.getMessage());
-                Toast.makeText(MainActivity.this, "connectFailed", Toast.LENGTH_SHORT).show();
+                Toast.makeText(MainActivity.this, "连接失败", Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -230,11 +239,11 @@ public class MainActivity extends AppCompatActivity {
                 .cleanSession(true)
                 //唯一标示 保证每个设备都唯一就可以 建议 imei
                 .clientId(imei)
-                .userName("admin")
-                .passWord("password")
+                .userName(name)
+                .passWord(psd)
                 //mqtt服务器地址 格式例如：
                 //  tcp://iot.eclipse.org:1883
-                .serverUrl("tcp://192.168.1.31:61613")
+                .serverUrl("tcp://"+ip+":"+port)
                 //心跳包默认的发送间隔
                 .keepAliveInterval(20)
                 .timeOut(10)
